@@ -115,6 +115,29 @@ export function computeOutputAmount(
   return new u64(outputAmount.toString());
 }
 
+export function computeInputAmount(
+  outputAmount: u64,
+  inputPoolAmount: u64,
+  outputPoolAmount: u64,
+  amp: u64
+): u64 {
+  const leverage = amp.mul(N_COINS);
+
+  const newOutputPoolAmount = outputPoolAmount.sub(outputAmount);
+
+  const d = computeD(leverage, outputPoolAmount, inputPoolAmount);
+
+  const newInputPoolAmount = _computeOutputAmount(
+    leverage,
+    newOutputPoolAmount,
+    d
+  );
+
+  const inputAmount = newInputPoolAmount.sub(inputPoolAmount);
+
+  return new u64(inputAmount.toString());
+}
+
 // Return the poolAmount if inputPoolAmount and outputPoolAmount were made equal. Used to calculate APY.
 export function computeEqualInput(
   tokenAPoolAmount: u64,

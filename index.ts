@@ -8,6 +8,7 @@ const TWO = new u64(2);
 const THREE = new u64(3);
 const FOUR = new u64(4);
 const EIGHT = new u64(8);
+const SIXTEEN = new u64(16);
 const N_COINS = TWO;
 const N_COINS_SQUARED = new u64(4);
 
@@ -154,4 +155,32 @@ export function computeEqualInput(
 
   const roots = getCubicRoots(a, b, c, d);
   return new u64(roots[0].real.round().toString());
+}
+
+// Take the derivative of the invariant function over x
+export function computeBaseOutputAmount(
+  inputAmount: u64,
+  inputPoolAmount: u64,
+  outputPoolAmount: u64,
+  amp: u64
+): u64 {
+  const leverage = amp.mul(N_COINS);
+  const invariant = computeD(leverage, inputPoolAmount, outputPoolAmount);
+
+  const a = amp.mul(SIXTEEN);
+  const b = a;
+  const c = invariant.mul(FOUR).sub(invariant.mul(amp).mul(SIXTEEN));
+
+  const numerator = TWO.mul(a)
+    .mul(inputPoolAmount)
+    .add(b.mul(outputPoolAmount))
+    .add(c)
+    .mul(outputPoolAmount);
+
+  const denominator = a
+    .mul(inputPoolAmount)
+    .add(TWO.mul(b).mul(outputPoolAmount).add(c))
+    .mul(inputPoolAmount);
+
+  return new u64(inputAmount.mul(numerator).div(denominator).toString());
 }

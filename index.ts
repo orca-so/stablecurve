@@ -151,7 +151,7 @@ export function computeEqualInput(
   const a = new Decimal(amp.mul(EIGHT).toString());
   const b = new Decimal(invariant.sub(amp.mul(invariant).mul(FOUR)).toString());
   const c = new Decimal(0);
-  const d = new Decimal(invariant.pow(THREE).div(FOUR).toString());
+  const d = new Decimal(invariant.neg().pow(THREE).div(FOUR).toString());
 
   const roots = getCubicRoots(a, b, c, d);
   return new u64(roots[0].real.round().toString());

@@ -1,4 +1,4 @@
-import {u64} from "@orca-so/spl-token";
+import {u64} from "@solana/spl-token";
 import {Decimal} from "decimal.js";
 import {getCubicRoots} from "./cuberoots";
 

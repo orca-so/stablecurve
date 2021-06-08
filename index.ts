@@ -12,14 +12,6 @@ const SIXTEEN = new u64(16);
 const N_COINS = TWO;
 const N_COINS_SQUARED = new u64(4);
 
-function almostEqual(n1: u64, n2: u64) {
-  if (n1.gt(n2)) {
-    return n1.sub(n2).lte(ONE);
-  } else {
-    return n2.sub(n1).lte(ONE);
-  }
-}
-
 // d = (leverage * sum_x + d_product * n_coins) * initial_d / ((leverage - 1) * initial_d + (n_coins + 1) * d_product)
 function calculateStep(
   initialD: u64,
@@ -42,8 +34,8 @@ function calculateStep(
 
 // A * sum(x_i) * n**n + D = A * D * n**n + D**(n+1) / (n**n * prod(x_i))
 function computeD(leverage: u64, amountA: u64, amountB: u64): u64 {
-  const amountATimesN = amountA.mul(N_COINS);
-  const amountBTimesN = amountB.mul(N_COINS);
+  const amountATimesN = amountA.mul(N_COINS).add(ONE);
+  const amountBTimesN = amountB.mul(N_COINS).add(ONE);
   const sumX = amountA.add(amountB);
 
   if (sumX.eq(ZERO)) {
@@ -59,7 +51,7 @@ function computeD(leverage: u64, amountA: u64, amountB: u64): u64 {
     dProduct = dProduct.mul(d).div(amountBTimesN);
     dPrevious = d;
     d = calculateStep(d, leverage, sumX, dProduct);
-    if (almostEqual(d, dPrevious)) {
+    if (d.eq(dPrevious)) {
       break;
     }
   }
@@ -84,7 +76,7 @@ function _computeOutputAmount(leverage: u64, newInputAmount: u64, d: u64): u64 {
   for (let i = 0; i < 32; i++) {
     yPrevious = y;
     y = y.sqr().add(c).div(y.mul(TWO).add(b).sub(d));
-    if (almostEqual(y, yPrevious)) {
+    if (y.eq(yPrevious)) {
       break;
     }
   }

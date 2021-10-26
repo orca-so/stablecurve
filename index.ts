@@ -176,3 +176,30 @@ export function computeBaseOutputAmount(
 
   return new u64(inputAmount.mul(numerator).div(denominator).toString());
 }
+
+export function computeSingleTokenDepositOutput(
+  inputAmount: u64,
+  isA: boolean,
+  tokenAPoolAmount: u64,
+  tokenBPoolAmount: u64,
+  amp: u64,
+  poolTokenSupply: u64
+): u64 {
+  if (inputAmount.eq(ZERO)) {
+    return ZERO;
+  }
+
+  const leverage = amp.mul(N_COINS);
+  const d0 = computeD(leverage, tokenAPoolAmount, tokenBPoolAmount);
+
+  const [depositTokenAmount, otherTokenAmount] = isA ?
+    [tokenAPoolAmount, tokenBPoolAmount] :
+    [tokenBPoolAmount, tokenAPoolAmount];
+
+  const updatedDepositTokenAmount = depositTokenAmount.add(inputAmount);
+  const d1 = computeD(leverage, updatedDepositTokenAmount, otherTokenAmount);
+  const diff = d1.sub(d0);
+  const finalAmount = new Decimal(diff.toString()).mul(poolTokenSupply.toString()).div(d0.toString());
+
+  return new u64(finalAmount.floor().toString());
+}
